@@ -17,8 +17,9 @@ namespace TouchyTorch
 
         private Camera camera;
         private Parameters mParams;
-        private bool isFlashLight;
+        private bool isFlashLight = false;
         ImageView imageView;
+        string tag = "log-tag";
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -32,6 +33,12 @@ namespace TouchyTorch
 
             imageView = FindViewById<ImageView>(Resource.Id.imageView);
 
+            if (bundle != null)
+            {
+                isFlashLight = bundle.GetBoolean("light_status", false);
+            }
+            
+
             imageView.Click += delegate
             {
                 FlashLight();
@@ -42,7 +49,7 @@ namespace TouchyTorch
             {
                 Android.App.AlertDialog alert = new Android.App.AlertDialog.Builder(this).Create();
                 alert.SetTitle("Error");
-                alert.SetMessage("Yout device does not support flash light");
+                alert.SetMessage("Your device does not support flash light");
                 alert.SetButton("OK", (s, e) => { return; });
                 alert.Show();
             }
@@ -80,6 +87,7 @@ namespace TouchyTorch
                 camera.StartPreview();
                 isFlashLight = true;
                 imageView.SetImageResource(Resource.Drawable.lightbulbOn);
+                Log.Info(tag, "isFlashLight is now true");
             }
             else
             {               
@@ -89,8 +97,24 @@ namespace TouchyTorch
                 camera.StartPreview();
                 isFlashLight = false;
                 imageView.SetImageResource(Resource.Drawable.lightbulbOff);
+                Log.Info(tag, "isFlashLight is now false");
             }
         }
+
+        protected override void OnSaveInstanceState(Bundle outState)
+        {
+            outState.PutBoolean("light_status", isFlashLight);
+
+            base.OnSaveInstanceState(outState);
+        }
+
+        public override void OnBackPressed()
+        {
+            Android.OS.Process.KillProcess(Android.OS.Process.MyPid());
+            base.OnBackPressed();
+
+        }
+
     }
 }
 
